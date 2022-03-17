@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import Card from '../calendar/Card';
 import NxWelcome from './nx-welcome';
 
 const StyledApp = styled.div`
@@ -8,7 +9,7 @@ const StyledApp = styled.div`
 export function App() {
   return (
     <StyledApp>
-      <NxWelcome title="rosa-app" />
+      <Card />
     </StyledApp>
   );
 }
