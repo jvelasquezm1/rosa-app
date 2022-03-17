@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "projects": {
+    "rosa-app": "apps/rosa-app",
+    "rosa-app-e2e": "apps/rosa-app-e2e"
+  }
+}
