@@ -20,5 +20,3 @@ export const motiveReasons = [
     { id: '61379ba159d4940022b6c929', name: 'Introduction call' },
     { id: '61eea350ddf6c500149ae2cb', name: 'Technical assessment' }
 ]
-
-export const daysInitials = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
