@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getCalendar } from '../../services/calendar.services'
-import { mockedValues, motiveReasons, no, yes } from '../../services/constants';
+import { mockedValues, initialMotiveReasons, no, yes } from '../../services/constants';
 import { addDaysToDate, displayEvery30Min, getDatesInRange } from '../../utils';
 import {
   Table,
@@ -20,7 +20,7 @@ import {
 } from '@material-ui/core';
 import { ICalendar } from '../../types/calendar.model';
 import EmptyBanner from '../common/EmptyBanner';
-import { isEmpty } from 'lodash';
+import { filter, includes, isEmpty } from 'lodash';
 
 export default function Card() {
   const { motive_, isNewPatient_ } = mockedValues
@@ -29,6 +29,7 @@ export default function Card() {
   const [calendarRange, setCalendarRange] = useState([] as Date[])
   const [availabilities, setAvailabilities] = useState([] as ICalendar[])
   const [nextPageClicked, setNextPageClicked] = useState(false)
+  const [motiveReasons, setMotiveReasons] = useState(initialMotiveReasons)
 
   useEffect(() => {
     const { initialDate_, endDate_ } = mockedValues
@@ -55,12 +56,19 @@ export default function Card() {
     }
   }
 
+  const handleMotives = (availability: any) => {
+    if (!includes(availability.motiveIds, motive)) {
+      setMotive(availability.motiveIds[0])
+    }
+    setMotiveReasons(filter(initialMotiveReasons, (motive) => includes(availability.motiveIds, motive.id)))
+  }
+
   const renderHours = (day: any, availability: any) => {
     const timeRange = displayEvery30Min(availability)
     return timeRange.map((hour: any, i: any) =>
       <TableRow key={i}>
         <TableCell component='th' scope='row'>
-          <Button>{parseInt(day.toString().split(' ')[2]) === availability.day ? hour : '-'}</Button>
+          <Button onClick={() => handleMotives(availability)}>{parseInt(day.toString().split(' ')[2]) === availability.day ? hour : '-'}</Button>
         </TableCell>
       </TableRow>
     )

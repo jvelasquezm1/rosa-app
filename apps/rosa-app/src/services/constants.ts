@@ -11,7 +11,7 @@ export const mockedValues = {
 export const yes = 'yes'
 export const no = 'no'
 
-export const motiveReasons = [
+export const initialMotiveReasons = [
     { id: '61eea367ddf6c500149ae2cc', name: 'Cultural fit' },
     { id: '61379ba159d4940022b6c929', name: 'Introduction call' },
     { id: '61eea350ddf6c500149ae2cb', name: 'Technical assessment' }
@@ -23,8 +23,7 @@ export const mockedResponse = [
         'eventIds': [],
         'motiveIds': [
             '61379ba159d4940022b6c929',
-            '61eea350ddf6c500149ae2cb',
-            '61eea367ddf6c500149ae2cc'
+            '61eea350ddf6c500149ae2cb'
         ],
         'calendarId': '61379ba159d4940022b6c928',
         'nextAvailabilityId': '621763d7a559a8797a83eccf',
