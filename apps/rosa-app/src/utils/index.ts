@@ -1,9 +1,14 @@
+import { max } from "lodash";
+
 export const getDatesInRange = (startDate: string, endDate: string) => {
     const dates = [];
     const dateISO = new Date(startDate);
     const endDateISO = new Date(endDate);
     while (dateISO <= endDateISO) {
-        dates.push(new Date(dateISO));
+        dates.push({
+            month: dateISO.toLocaleString('en-us', { month: 'short' }), 
+            day: dateISO.toLocaleString('en-us', { weekday: 'short' }), 
+            number: dateISO.getDate() });
         dateISO.setDate(dateISO.getDate() + 1);
     }
     return dates;
@@ -13,16 +18,20 @@ const getMinutesWithTwoDigits = (initialHour: Date) => initialHour.getMinutes() 
     ? `0${initialHour.getMinutes()}`
     : initialHour.getMinutes()
 
-export const displayEvery30Min = (availability: any) => {
-    const hours = [] as any;
-    const initialHour = new Date(availability.startAt);
-    const endHour = new Date(availability.endAt);
-    while (initialHour.getHours() < endHour.getHours()) {
-        hours.push(`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`);
-        initialHour.setMinutes(initialHour.getMinutes() + 30);
-    }
+export const displayEvery30Min = (availabilities: any) => {
+    let hours = {} as any;
+    availabilities.map((availability: any) => {
+        const initialHour = new Date(availability.startAt);
+        const endHour = new Date(availability.endAt);
+        while (initialHour.getHours() < endHour.getHours()) {
+            hours[initialHour.getDate()] = hours[initialHour.getDate()] ? Object.assign(hours[initialHour.getDate()], { slots: [...hours[initialHour.getDate()].slots, `${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`] }) : { slots: [`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`] };
+            initialHour.setMinutes(initialHour.getMinutes() + 30);
+        }
+    })
     return hours;
 }
+
+export const getArrayOfTr = (availabilities: any) => Array.from({ length: max(Object.values(availabilities).map((a: any) => a.slots.length)) }, (v: any, i: any) => i);
 
 export const addDaysToDate = (numberOfDays: number, date: string) => {
     const currentDate = new Date(date);
