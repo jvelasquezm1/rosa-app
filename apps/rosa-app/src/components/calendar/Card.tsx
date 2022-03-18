@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react'
-import { getCalendar } from '../../services/calendar.services'
-import { mockedValues, initialMotiveReasons, no, yes } from '../../services/constants';
-import { addDaysToDate, displayEvery30Min, getDatesInRange } from '../../utils';
 import {
   Table,
   TableHead,
@@ -11,16 +8,19 @@ import {
   Button,
   FormControlLabel,
   FormControl,
-  FormLabel,
   RadioGroup,
   Radio,
-  InputLabel,
   Select,
   MenuItem
 } from '@material-ui/core';
+import { filter, includes, isEmpty } from 'lodash';
+import { CalendarContainer } from './styles';
+
 import { ICalendar } from '../../types/calendar.model';
 import EmptyBanner from '../common/EmptyBanner';
-import { filter, includes, isEmpty } from 'lodash';
+import { getCalendar } from '../../services/calendar.services'
+import { mockedValues, initialMotiveReasons, no, yes } from '../../services/constants';
+import { addDaysToDate, displayEvery30Min, getDatesInRange } from '../../utils';
 
 export default function Card() {
   const { motive_, isNewPatient_ } = mockedValues
@@ -75,16 +75,17 @@ export default function Card() {
   }
 
   return (
-    <>
+    <CalendarContainer>
+      <h1>Find availability</h1>
       <FormControl>
-        <FormLabel id='appointment-label'>Is this your first appointment with this practitioner?</FormLabel>
+        <h3>Is this your first appointment with this practitioner?</h3>
         <RadioGroup row defaultValue={yes} onChange={(e: any) => setIsNewPatient(e.target.value === { yes })}>
-          <FormControlLabel value={yes} control={<Radio />} color='secondary' label='Yes' />
-          <FormControlLabel value={no} control={<Radio />} color='secondary' label='No' />
+          <FormControlLabel value={yes} control={<Radio color='default'/>} label='Yes' />
+          <FormControlLabel value={no} control={<Radio color='default'/>} label='No' />
         </RadioGroup>
       </FormControl>
       <FormControl fullWidth>
-        <InputLabel>What is the reason for your visit?</InputLabel>
+        <h3>What is the reason for your visit?</h3>
         <Select
           value={motive}
           label='Motive'
@@ -103,7 +104,7 @@ export default function Card() {
               return (
                 <TableCell key={i} component='th' scope='row'>
                   <p>{day.toString().split(' ')[0]}</p>
-                  <p>{day.toString().split(' ')[1]} - {day.toString().split(' ')[2]}</p>
+                  <p>{day.toString().split(' ')[1]} {day.toString().split(' ')[2]}</p>
                 </TableCell>
               );
             })}
@@ -125,6 +126,6 @@ export default function Card() {
         </TableBody>
       </Table>
       {isEmpty(availabilities) && <><EmptyBanner /></>}
-    </>
+    </CalendarContainer>
   )
 }
