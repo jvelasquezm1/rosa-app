@@ -24,4 +24,13 @@ export const displayEvery30Min = (availability: any) => {
     return hours;
 }
 
-export const paginate = (calendar: object[], page_size: number, page_number: number) => calendar.slice((page_number - 1) * page_size, page_number * page_size);
+export const addDaysToDate = (numberOfDays: number, date: string) => {
+    const currentDate = new Date(date);
+    const daysAfterToday = currentDate.setDate(currentDate.getDate() + numberOfDays);
+    return new Date(daysAfterToday).toISOString();
+}
+
+export const convertDateToISO = (date?: string) => {
+    const currentDate = new Date();
+    return date ? new Date(date).toISOString() : currentDate.toISOString();
+}

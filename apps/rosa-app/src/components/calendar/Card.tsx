@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getCalendar } from '../services/calendar.services'
-import { mockedValues, motiveReasons, no, yes } from '../services/constants';
-import { displayEvery30Min, getDatesInRange, paginate } from '../utils';
+import { getCalendar } from '../../services/calendar.services'
+import { mockedValues, motiveReasons, no, yes } from '../../services/constants';
+import { addDaysToDate, displayEvery30Min, getDatesInRange } from '../../utils';
 import {
   Table,
   TableHead,
@@ -18,23 +18,42 @@ import {
   Select,
   MenuItem
 } from '@material-ui/core';
-import { ICalendar } from '../types/calendar.model';
+import { ICalendar } from '../../types/calendar.model';
+import EmptyBanner from '../common/EmptyBanner';
+import { isEmpty } from 'lodash';
 
 export default function Card() {
-  const { motive_, isNewPatient_, nextPage_ } = mockedValues
+  const { motive_, isNewPatient_ } = mockedValues
   const [motive, setMotive] = useState(motive_ as string)
   const [isNewPatient, setIsNewPatient] = useState(isNewPatient_)
-  const [nextPage, setNextPage] = useState(nextPage_)
   const [calendarRange, setCalendarRange] = useState([] as Date[])
   const [availabilities, setAvailabilities] = useState([] as ICalendar[])
+  const [nextPageClicked, setNextPageClicked] = useState(false)
 
   useEffect(() => {
     const { initialDate_, endDate_ } = mockedValues
     setCalendarRange(getDatesInRange(initialDate_, endDate_));
-    getCalendar(initialDate_, endDate_, motive, isNewPatient, nextPage).then(
+    getCalendar(initialDate_, endDate_, motive, isNewPatient).then(
       options => setAvailabilities(options)
-    )
+    );
   }, []);
+
+  const handleNextPage = (nextPage: boolean) => {
+    const { initialDate_, endDate_ } = mockedValues
+    if (nextPage) {
+      setNextPageClicked(true)
+      setCalendarRange(getDatesInRange(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_)));
+      getCalendar(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_), motive, isNewPatient).then(
+        options => setAvailabilities(options)
+      );
+    } else {
+      setNextPageClicked(false);
+      setCalendarRange(getDatesInRange(initialDate_, endDate_));
+      getCalendar(initialDate_, endDate_, motive, isNewPatient).then(
+        options => setAvailabilities(options)
+      );
+    }
+  }
 
   const renderHours = (day: any, availability: any) => {
     const timeRange = displayEvery30Min(availability)
@@ -71,8 +90,8 @@ export default function Card() {
       <Table size='small' aria-label='purchases'>
         <TableHead>
           <TableRow>
-            <TableCell> <Button onClick={() => setNextPage(false)}> {'<'} </Button> </TableCell>
-            {paginate(calendarRange, 5, nextPage ? 2 : 1).map((day: object, i: any) => {
+            <TableCell> <Button disabled={!nextPageClicked} onClick={() => handleNextPage(false)}> {'<'} </Button> </TableCell>
+            {calendarRange.map((day: object, i: any) => {
               return (
                 <TableCell key={i} component='th' scope='row'>
                   <p>{day.toString().split(' ')[0]}</p>
@@ -80,21 +99,24 @@ export default function Card() {
                 </TableCell>
               );
             })}
-            <TableCell> <Button onClick={() => setNextPage(true)}> {'>'} </Button> </TableCell>
+            <TableCell> <Button disabled={nextPageClicked} onClick={() => handleNextPage(true)}> {'>'} </Button> </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-        <TableCell/>
-          {paginate(calendarRange, 5, nextPage ? 2 : 1).map((day: object, i: any) => {
-            return (
-              <TableCell key={i} component='th' scope='row'>
-                {availabilities.map((availability: any, i: any) => renderHours(day, availability))}
-              </TableCell>
-            );
+          <TableCell />
+          {calendarRange.map((day: object, i: any) => {
+            return isEmpty(availabilities)
+              ? <TableCell key={i} component='th' scope='row'> - </TableCell>
+              : (
+                <TableCell key={i} component='th' scope='row'>
+                  {availabilities.map((availability: any, i: any) => renderHours(day, availability))}
+                </TableCell>
+              );
           })}
-          <TableCell/>
+          <TableCell />
         </TableBody>
       </Table>
+      {isEmpty(availabilities) && <><EmptyBanner /></>}
     </>
   )
 }

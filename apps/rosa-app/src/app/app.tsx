@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import Card from '../calendar/Card';
-import NxWelcome from './nx-welcome';
+import Card from '../components/calendar/Card';
 
 const StyledApp = styled.div`
   // Your style here
