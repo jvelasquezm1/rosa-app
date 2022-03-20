@@ -8,3 +8,9 @@ export const CalendarContainer = styled.div`
     background: #ffff;
     box-shadow: 5px 5px 9px 0px rgba(0,0,0,0.45);
 `;
+
+export const DivCenter = styled.div`
+    text-align: center;
+    padding: 1rem;
+    margin: 1rem;
+`;

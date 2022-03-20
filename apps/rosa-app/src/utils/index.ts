@@ -6,8 +6,8 @@ export const getDatesInRange = (startDate: string, endDate: string) => {
     const endDateISO = new Date(endDate);
     while (dateISO <= endDateISO) {
         dates.push({
-            month: dateISO.toLocaleString('en-us', { month: 'short' }), 
-            day: dateISO.toLocaleString('en-us', { weekday: 'short' }), 
+            month: dateISO.toLocaleString('en-us', { month: 'short' }),
+            day: dateISO.toLocaleString('en-us', { weekday: 'short' }),
             number: dateISO.getDate() });
         dateISO.setDate(dateISO.getDate() + 1);
     }
@@ -24,7 +24,14 @@ export const displayEvery30Min = (availabilities: any) => {
         const initialHour = new Date(availability.startAt);
         const endHour = new Date(availability.endAt);
         while (initialHour.getHours() < endHour.getHours()) {
-            hours[initialHour.getDate()] = hours[initialHour.getDate()] ? Object.assign(hours[initialHour.getDate()], { slots: [...hours[initialHour.getDate()].slots, `${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`] }) : { slots: [`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`] };
+            hours[initialHour.getDate()] = hours[initialHour.getDate()]
+                ? Object.assign(hours[initialHour.getDate()],
+                    {
+                        motives: availability.motiveIds,
+                        slots: [...hours[initialHour.getDate()].slots,
+                        `${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`]
+                    })
+                : { slots: [`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`] };
             initialHour.setMinutes(initialHour.getMinutes() + 30);
         }
     })
@@ -43,3 +50,5 @@ export const convertDateToISO = (date?: string) => {
     const currentDate = new Date();
     return date ? new Date(date).toISOString() : currentDate.toISOString();
 }
+
+export const paginate = (array: any, page_size: any, page_number: any) => array.slice((page_number - 1) * page_size, page_number * page_size)

@@ -9,12 +9,12 @@ import {
   MenuItem
 } from '@material-ui/core';
 import { filter, includes, isEmpty } from 'lodash';
-import { CalendarContainer } from './styles';
+import { CalendarContainer, DivCenter } from './styles';
 
 import EmptyBanner from '../common/EmptyBanner';
 import { getCalendar } from '../../services/calendar.services'
 import { mockedValues, initialMotiveReasons, no, yes } from '../../services/constants';
-import { addDaysToDate, displayEvery30Min, getArrayOfTr, getDatesInRange } from '../../utils';
+import { addDaysToDate, displayEvery30Min, getArrayOfTr, getDatesInRange, paginate } from '../../utils';
 
 export default function Card() {
   const { motive_, isNewPatient_ } = mockedValues
@@ -23,7 +23,13 @@ export default function Card() {
   const [calendarRange, setCalendarRange] = useState([] as any)
   const [availabilities, setAvailabilities] = useState({} as any)
   const [nextPageClicked, setNextPageClicked] = useState(false)
+  const [displayShowMore, setDisplayShowMore] = useState(true)
   const [motiveReasons, setMotiveReasons] = useState(initialMotiveReasons)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 6
+  })
+  const [timeSlot, setTimeSlot] = useState('')
 
   useEffect(() => {
     const { initialDate_, endDate_ } = mockedValues
@@ -51,10 +57,20 @@ export default function Card() {
   }
 
   const handleMotives = (availability: any) => {
-    if (!includes(availability.motiveIds, motive)) {
-      setMotive(availability.motiveIds[0])
+    if (!includes(availability.motives, motive)) {
+      setMotive(availability.motives[0])
     }
-    setMotiveReasons(filter(initialMotiveReasons, (motive) => includes(availability.motiveIds, motive.id)))
+    setMotiveReasons(filter(initialMotiveReasons, (motive) => includes(availability.motives, motive.id)))
+  }
+
+  const handleShowMore = () => {
+    setPagination({ ...pagination, pageSize: getArrayOfTr(availabilities).length })
+    setDisplayShowMore(false)
+  }
+
+  const handleTimeSelection = (time: any, index: number) => {
+    handleMotives(availabilities[time.number])
+    setTimeSlot(availabilities[time.number].slots[index] || '')
   }
 
   return (
@@ -97,18 +113,18 @@ export default function Card() {
             </tr>
           </thead>
           <tbody>
-            {!isEmpty(availabilities) && getArrayOfTr(availabilities).map((a: any, index: any) => {
+            {!isEmpty(availabilities) && paginate(getArrayOfTr(availabilities), pagination.pageSize, pagination.page).map((a: any, index: any) => {
               return <tr key={index}>
                 <td />
                 {calendarRange.map((time: any, i: any) => {
                   return !isEmpty(availabilities[time.number]) ?
                     <td key={i}>
-                      <Button onClick={() => handleMotives({})}>{availabilities[time.number].slots[index] || '-'}</Button>
+                      <Button onClick={() => handleTimeSelection(time, index)}>{availabilities[time.number].slots[index] || '-'}</Button>
                     </td> :
                     <td key={i}>
-                    <Button>
-                      -
-                    </Button>
+                      <Button>
+                        -
+                      </Button>
                     </td>
                 })}
                 <td />
@@ -116,8 +132,20 @@ export default function Card() {
             })}
           </tbody>
         </table>
+        {isEmpty(availabilities) ? <><EmptyBanner /></> :
+          displayShowMore &&
+          <DivCenter>
+            <Button onClick={() => handleShowMore()}>
+              <p>Show more availabilities</p>
+            </Button>
+          </DivCenter>}
+        {!isEmpty(availabilities) &&
+          <DivCenter>
+            <Button onClick={() => console.log(motive, timeSlot, isNewPatient)}>
+              <p>Book appointment</p>
+            </Button>
+          </DivCenter>}
       </div>
-      {isEmpty(availabilities) && <><EmptyBanner /></>}
-    </CalendarContainer>
+    </CalendarContainer >
   )
 }
