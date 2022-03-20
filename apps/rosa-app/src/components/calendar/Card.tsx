@@ -9,7 +9,7 @@ import {
   MenuItem
 } from '@material-ui/core';
 import { filter, includes, isEmpty } from 'lodash';
-import { CalendarContainer, DivCenter } from './styles';
+import { ButtonCalendar, CalendarContainer, DivCenter } from './styles';
 
 import EmptyBanner from '../common/EmptyBanner';
 import { getCalendar } from '../../services/calendar.services'
@@ -30,6 +30,7 @@ export default function Card() {
     pageSize: 6
   })
   const [timeSlot, setTimeSlot] = useState('')
+  const [cellSelected, setCellSelected] = useState({} as any)
 
   useEffect(() => {
     const { initialDate_, endDate_ } = mockedValues
@@ -68,7 +69,8 @@ export default function Card() {
     setDisplayShowMore(false)
   }
 
-  const handleTimeSelection = (time: any, index: number) => {
+  const handleTimeSelection = (time: any, index: number, i: number) => {
+    setCellSelected({ id: `${index}:${i}` })
     handleMotives(availabilities[time.number])
     setTimeSlot(availabilities[time.number].slots[index] || '')
   }
@@ -119,7 +121,7 @@ export default function Card() {
                 {calendarRange.map((time: any, i: any) => {
                   return !isEmpty(availabilities[time.number]) ?
                     <td key={i}>
-                      <Button onClick={() => handleTimeSelection(time, index)}>{availabilities[time.number].slots[index] || '-'}</Button>
+                      <ButtonCalendar selected={`${index}:${i}` === cellSelected.id} onClick={() => handleTimeSelection(time, index, i)}>{availabilities[time.number].slots[index] || '-'}</ButtonCalendar>
                     </td> :
                     <td key={i}>
                       <Button>
