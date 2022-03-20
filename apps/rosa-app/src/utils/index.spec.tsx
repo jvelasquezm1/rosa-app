@@ -5,9 +5,11 @@ import {
   mockedRange,
   mockedStartDate,
   mockedAvailabilities,
-  mocked30MinutesRange,
+  mockedSlot,
   arrayOf9Elements,
-  mockedStartDatePlus5Days
+  mockedStartDatePlus5Days,
+  mockedMotives,
+  mockedMotiveId
 } from './mocks';
 
 describe('Utils of calendar', () => {
@@ -21,14 +23,14 @@ describe('Utils of calendar', () => {
     expect(minute).toEqual(`0${minuteLessThanTen.getMinutes()}`);
   });
 
-  it('should display range of time every 30 minutes', () => {
-    const availabilitiesEvery30Minutes = utils.displayEvery30Min(mockedAvailabilities);
-    expect(availabilitiesEvery30Minutes).toEqual(mocked30MinutesRange);
+  it('should display range of time every determine slot of time', () => {
+    const availabilitiesEverySlot = utils.displayEverySlot(mockedAvailabilities, mockedMotives, true, mockedMotiveId);
+    expect(availabilitiesEverySlot).toEqual(mockedSlot);
   });
 
   it('should return an array with size of the highest number of slots in one availabliity', () => {
-    const availabilitiesEvery30Minutes = utils.displayEvery30Min(mockedAvailabilities);
-    const maxArray = utils.getArrayOfTr(availabilitiesEvery30Minutes);
+    const availabilitiesEverySlot = utils.displayEverySlot(mockedAvailabilities, mockedMotives, true, mockedMotiveId);
+    const maxArray = utils.getArrayOfTr(availabilitiesEverySlot);
     expect(maxArray).toEqual(arrayOf9Elements);
   });
 

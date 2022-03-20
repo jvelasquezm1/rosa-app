@@ -1,5 +1,5 @@
-import { max } from 'lodash';
-import { initialMotiveReasons } from '../components/calendar/constants';
+import { find, max } from 'lodash';
+import { existingPatient, newPatient } from '../components/calendar/constants';
 
 const getDatesInRange = (startDate: string, endDate: string) => {
     const dates = [];
@@ -9,7 +9,8 @@ const getDatesInRange = (startDate: string, endDate: string) => {
         dates.push({
             month: dateISO.toLocaleString('en-us', { month: 'short' }),
             day: dateISO.toLocaleString('en-us', { weekday: 'short' }),
-            number: dateISO.getDate() });
+            number: dateISO.getDate()
+        });
         dateISO.setDate(dateISO.getDate() + 1);
     }
     return dates;
@@ -19,8 +20,10 @@ const getMinutesWithTwoDigits = (initialHour: Date) => initialHour.getMinutes() 
     ? `0${initialHour.getMinutes()}`
     : initialHour.getMinutes()
 
-const displayEvery30Min = (availabilities: any) => {
+const displayEverySlot = (availabilities: any, motives: any, isNewPatient: boolean, motive: string) => {
+    const selectedMotive = find(motives, { id: motive });
     let hours = {} as any;
+    const { calendarConfigurations } = selectedMotive;
     availabilities.map((availability: any) => {
         const initialHour = new Date(availability.startAt);
         const endHour = new Date(availability.endAt);
@@ -28,18 +31,17 @@ const displayEvery30Min = (availabilities: any) => {
             hours[initialHour.getDate()] = hours[initialHour.getDate()]
                 ? Object.assign(hours[initialHour.getDate()],
                     {
-                        motives: availability.motiveIds,
                         slots: [...hours[initialHour.getDate()].slots,
                         `${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`]
                     })
-                : { slots: [`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`], motives: initialMotiveReasons };
-            initialHour.setMinutes(initialHour.getMinutes() + 30);
+                : { slots: [`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`] };
+            initialHour.setMinutes(initialHour.getMinutes() + calendarConfigurations[0].defaultDurations[isNewPatient ? newPatient : existingPatient].duration);
         }
     })
     return hours;
 }
 
-const getArrayOfTr = (availabilities: any) => Array.from({ length: max(Object.values(availabilities).map((a: any) => a.slots.length)) }, (v: any, i: any) => i);
+const getArrayOfTr = (availabilities: any) => Array.from({ length: max(Object.values(availabilities).map((a: any) => a.slots ? a.slots.length : 0)) }, (v: any, i: any) => i);
 
 const addDaysToDate = (numberOfDays: number, date: string) => {
     const currentDate = new Date(date);
@@ -52,7 +54,7 @@ const paginate = (array: any, page_size: any, page_number: any) => array.slice((
 export {
     getDatesInRange,
     getMinutesWithTwoDigits,
-    displayEvery30Min,
+    displayEverySlot,
     getArrayOfTr,
     addDaysToDate,
     paginate

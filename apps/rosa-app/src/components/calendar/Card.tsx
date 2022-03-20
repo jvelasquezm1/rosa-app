@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import {
   Button,
   FormControlLabel,
@@ -9,63 +9,74 @@ import {
   MenuItem,
   Dialog
 } from '@material-ui/core';
-import { filter, find, includes, isEmpty } from 'lodash';
+import { find, isEmpty } from 'lodash';
 import { ButtonCalendar, CalendarContainer, DivCenter, StyledP } from './styles';
 
 import EmptyBanner from '../common/EmptyBanner';
 import { getCalendar } from '../../services/calendar.services'
-import { intialValues, initialMotiveReasons, no, yes } from './constants';
-import { addDaysToDate, displayEvery30Min, getArrayOfTr, getDatesInRange, paginate } from '../../utils';
+import { intialValues, no, yes } from './constants';
+import { addDaysToDate, displayEverySlot, getArrayOfTr, getDatesInRange, paginate } from '../../utils';
 import { ICalendarRange } from '../../types/calendar.model';
+import withCommonDataDataProvider from '../../HOCs/withCommonDataProvider';
 
-export default function Card() {
-  const { motive_, isFirstAppointment_ } = intialValues
-  const [motive, setMotive] = useState(motive_ as string)
-  const [isFirstAppointment, setIsFirstAppointment] = useState(isFirstAppointment_)
+function Card(props: any) {
+  const { initialDate_, endDate_ } = intialValues
+  const [initialDate, setInitialDate] = useState(initialDate_)
+  const [endDate, setEndDate] = useState(endDate_)
+  const [motive, setMotive] = useState({} as any)
+  const [calendarId, setCalendarId] = useState('' as string)
+  const [isFirstAppointment, setIsFirstAppointment] = useState(true)
   const [calendarRange, setCalendarRange] = useState([] as ICalendarRange[])
   const [availabilities, setAvailabilities] = useState({} as any)
   const [nextPageClicked, setNextPageClicked] = useState(false)
   const [displayShowMore, setDisplayShowMore] = useState(true)
   const [openModal, setOpenModal] = useState(false)
   const [modalMessage, setModalMessage] = useState('')
-  const [motiveReasons, setMotiveReasons] = useState(initialMotiveReasons)
+  const [motiveReasons, setMotiveReasons] = useState([] as any)
   const [pagination, setPagination] = useState({
     page: 1,
-    pageSize: 6
+    pageSize: 3
   })
   const [timeSlot, setTimeSlot] = useState('')
   const [cellSelected, setCellSelected] = useState({} as any)
 
   useEffect(() => {
-    const { initialDate_, endDate_ } = intialValues
-    setCalendarRange(getDatesInRange(initialDate_, endDate_));
-    getCalendar(initialDate_, endDate_, motive, isFirstAppointment).then(
-      options => setAvailabilities(displayEvery30Min(options))
-    );
-  }, []);
+    const { commonData } = props;
+    if (!isEmpty(commonData)) {
+      setCalendarRange(getDatesInRange(initialDate, endDate));
+      setMotiveReasons(commonData.data.motives);
+      setMotive(commonData.data.motives[0]);
+      setCalendarId(commonData.data.calendars[0].id);
+      getCalendar(initialDate, endDate, commonData.data.motives[0].id, isFirstAppointment, commonData.data.calendars[0].id).then(
+        options => setAvailabilities(displayEverySlot(options, commonData.data.motives, isFirstAppointment, commonData.data.motives[0].id))
+      );
+    }
+  }, [props.commonData]);
+
+  const cleanState = () => {
+    setCellSelected({});
+    setTimeSlot('');
+  }
 
   const handleNextPage = (nextPage: boolean) => {
-    const { initialDate_, endDate_ } = intialValues
+    cleanState();
     if (nextPage) {
-      setNextPageClicked(true)
-      setCalendarRange(getDatesInRange(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_)));
-      getCalendar(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_), motive, isFirstAppointment).then(
-        options => setAvailabilities(displayEvery30Min(options))
+      setNextPageClicked(true);
+      setInitialDate(addDaysToDate(5, initialDate));
+      setEndDate(addDaysToDate(5, endDate));
+      setCalendarRange(getDatesInRange(addDaysToDate(5, initialDate), addDaysToDate(5, endDate)));
+      getCalendar(addDaysToDate(5, initialDate), addDaysToDate(5, endDate), motive.id, isFirstAppointment, calendarId).then(
+        options => setAvailabilities(displayEverySlot(options, motiveReasons, isFirstAppointment, motive.id))
       );
     } else {
       setNextPageClicked(false);
+      setInitialDate(initialDate_);
+      setEndDate(endDate_);
       setCalendarRange(getDatesInRange(initialDate_, endDate_));
-      getCalendar(initialDate_, endDate_, motive, isFirstAppointment).then(
-        options => setAvailabilities(displayEvery30Min(options))
+      getCalendar(initialDate_, endDate_, motive.id, isFirstAppointment, calendarId).then(
+        options => setAvailabilities(displayEverySlot(options, motiveReasons, isFirstAppointment, motive.id))
       );
     }
-  }
-
-  const handleMotives = (availability: any) => {
-    if (!includes(availability.motives, motive)) {
-      setMotive(availability.motives[0])
-    }
-    setMotiveReasons(filter(initialMotiveReasons, (motive) => includes(availability.motives, motive.id)))
   }
 
   const handleShowMore = () => {
@@ -75,17 +86,32 @@ export default function Card() {
 
   const handleTimeSelection = (time: any, index: number, i: number) => {
     setCellSelected({ id: `${index}:${i}`, time: time })
-    handleMotives(availabilities[time.number])
     setTimeSlot(availabilities[time.number].slots[index] || '')
   }
 
+  const handleChangeMotive = (event: any) => {
+    const newMotive = find(motiveReasons, { id : event.target.value });
+    cleanState();
+    setMotive(newMotive);
+    getCalendar(initialDate, endDate, newMotive.id, isFirstAppointment, calendarId).then(
+      options => setAvailabilities(displayEverySlot(options, motiveReasons, isFirstAppointment, newMotive.id))
+    );
+  }
+
   const validateAppointment = () => {
-    const motiveReason = find(motiveReasons, { id: motive }) || { name: '' },
-      { time } = cellSelected;
+    const { time } = cellSelected;
     setOpenModal(true)
     isEmpty(timeSlot)
       ? setModalMessage('Select time first to continue booking')
-      : setModalMessage(`${isFirstAppointment ? 'First a' : ' A'}ppointment booked for ${time.day}, ${time.month} ${time.number} at ${timeSlot} with motive: ${motiveReason.name}`)
+      : setModalMessage(`${isFirstAppointment ? 'First a' : ' A'}ppointment booked for ${time.day}, ${time.month} ${time.number} at ${timeSlot} with motive: ${motive.label}`)
+  }
+
+  const handleIsFirstAppointment = (event: any) => {
+    setIsFirstAppointment(event.target.value === { yes });
+    cleanState();
+    getCalendar(initialDate, endDate, motive.id, event.target.value, calendarId).then(
+      options => setAvailabilities(displayEverySlot(options, motiveReasons, event.target.value === { yes }, motive.id))
+    );
   }
 
   return (
@@ -93,7 +119,7 @@ export default function Card() {
       <h1>Find availability</h1>
       <FormControl>
         <h3>Is this your first appointment with this practitioner?</h3>
-        <RadioGroup row defaultValue={yes} onChange={(e: any) => setIsFirstAppointment(e.target.value === { yes })}>
+        <RadioGroup row defaultValue={yes} onChange={(event: any) => handleIsFirstAppointment(event)}>
           <FormControlLabel value={yes} control={<Radio color='default' />} label='Yes' />
           <FormControlLabel value={no} control={<Radio color='default' />} label='No' />
         </RadioGroup>
@@ -101,12 +127,12 @@ export default function Card() {
       <FormControl fullWidth>
         <h3>What is the reason for your visit?</h3>
         <Select
-          value={motive}
+          value={isEmpty(motive) ? '' : motive.id}
           label='Motive'
-          onChange={(e: any) => setMotive(e.target.value)}
+          onChange={(e: any) => handleChangeMotive(e)}
         >
-          {motiveReasons.map((motive, id) => {
-            return <MenuItem key={id} value={motive.id}>{motive.name}</MenuItem>
+          {!isEmpty(motiveReasons) && motiveReasons.map((motive: any, id: any) => {
+            return <MenuItem key={id} value={motive.id}>{motive.label}</MenuItem>
           })}
         </Select>
       </FormControl>
@@ -115,7 +141,7 @@ export default function Card() {
           <thead>
             <tr>
               <th> <Button disabled={!nextPageClicked} onClick={() => handleNextPage(false)}> {'<'} </Button> </th>
-              {calendarRange.map((time: any, i: any) => {
+              {!isEmpty(calendarRange) && calendarRange.map((time: any, i: any) => {
                 const { day, month, number } = time;
                 return (
                   <th key={i}>
@@ -171,3 +197,5 @@ export default function Card() {
     </CalendarContainer >
   )
 }
+
+export default withCommonDataDataProvider(Card);

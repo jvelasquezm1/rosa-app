@@ -37,7 +37,7 @@ const mockedAvailabilities = [
     }
 ]
 
-const mocked30MinutesRange = {
+const mockedSlot = {
     '18': {
         slots: [
             '9:30', '10:00',
@@ -45,16 +45,31 @@ const mocked30MinutesRange = {
             '11:30', '15:00',
             '15:30', '16:00',
             '16:30'
-        ],
-        motives: [
-            '61379ba159d4940022b6c929',
-            '61eea350ddf6c500149ae2cb',
-            '61eea367ddf6c500149ae2cc'
         ]
     }
 }
 
 const arrayOf9Elements = Array.from({ length: 9 }, (v: any, i: any) => i)
+
+const mockedMotives = [
+    {
+        'id': '61eea367ddf6c500149ae2cc',
+        'calendarConfigurations': [
+            {
+                'defaultDurations': {
+                    'newPatient': {
+                        'duration': 30
+                    },
+                    'existingPatient': {
+                        'duration': 30
+                    }
+                },
+            }
+        ]
+    }
+]
+
+const mockedMotiveId = '61eea367ddf6c500149ae2cc'
 
 export {
     mockedRange,
@@ -63,6 +78,8 @@ export {
     mockedStartDatePlus5Days,
     minuteLessThanTen,
     mockedAvailabilities,
-    mocked30MinutesRange,
-    arrayOf9Elements
+    mockedSlot,
+    arrayOf9Elements,
+    mockedMotives,
+    mockedMotiveId
 }
