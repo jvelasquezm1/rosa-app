@@ -14,13 +14,13 @@ import { ButtonCalendar, CalendarContainer, DivCenter, StyledP } from './styles'
 
 import EmptyBanner from '../common/EmptyBanner';
 import { getCalendar } from '../../services/calendar.services'
-import { intialValues, no, yes } from './constants';
+import { initialValues, no, rangeOfDaysDisplayed, yes } from './constants';
 import { addDaysToDate, displayEverySlot, getArrayOfTr, getDatesInRange, paginate } from '../../utils';
 import { ICalendarRange } from '../../types/calendar.model';
 import withCommonDataDataProvider from '../../HOCs/withCommonDataProvider';
 
 function Card(props: any) {
-  const { initialDate_, endDate_ } = intialValues
+  const { initialDate_, endDate_ } = initialValues
   const [initialDate, setInitialDate] = useState(initialDate_)
   const [endDate, setEndDate] = useState(endDate_)
   const [motive, setMotive] = useState({} as any)
@@ -33,10 +33,7 @@ function Card(props: any) {
   const [openModal, setOpenModal] = useState(false)
   const [modalMessage, setModalMessage] = useState('')
   const [motiveReasons, setMotiveReasons] = useState([] as any)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: 3
-  })
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 3 })
   const [timeSlot, setTimeSlot] = useState('')
   const [cellSelected, setCellSelected] = useState({} as any)
 
@@ -58,25 +55,21 @@ function Card(props: any) {
     setTimeSlot('');
   }
 
+  const setPageBehavior = (pageClicked: boolean, dateInitial: string, dateEnd: string) => {
+    setNextPageClicked(pageClicked);
+    setInitialDate(dateInitial);
+    setEndDate(dateEnd);
+    setCalendarRange(getDatesInRange(dateInitial, dateEnd));
+    getCalendar(dateInitial, dateEnd, motive.id, isFirstAppointment, calendarId).then(
+      options => setAvailabilities(displayEverySlot(options, motiveReasons, isFirstAppointment, motive.id))
+    );
+  }
+
   const handleNextPage = (nextPage: boolean) => {
     cleanState();
-    if (nextPage) {
-      setNextPageClicked(true);
-      setInitialDate(addDaysToDate(5, initialDate));
-      setEndDate(addDaysToDate(5, endDate));
-      setCalendarRange(getDatesInRange(addDaysToDate(5, initialDate), addDaysToDate(5, endDate)));
-      getCalendar(addDaysToDate(5, initialDate), addDaysToDate(5, endDate), motive.id, isFirstAppointment, calendarId).then(
-        options => setAvailabilities(displayEverySlot(options, motiveReasons, isFirstAppointment, motive.id))
-      );
-    } else {
-      setNextPageClicked(false);
-      setInitialDate(initialDate_);
-      setEndDate(endDate_);
-      setCalendarRange(getDatesInRange(initialDate_, endDate_));
-      getCalendar(initialDate_, endDate_, motive.id, isFirstAppointment, calendarId).then(
-        options => setAvailabilities(displayEverySlot(options, motiveReasons, isFirstAppointment, motive.id))
-      );
-    }
+    nextPage
+      ? setPageBehavior(true, addDaysToDate(rangeOfDaysDisplayed, initialDate), addDaysToDate(rangeOfDaysDisplayed, endDate))
+      : setPageBehavior(false, initialDate_, endDate_)
   }
 
   const handleShowMore = () => {
@@ -90,7 +83,7 @@ function Card(props: any) {
   }
 
   const handleChangeMotive = (event: any) => {
-    const newMotive = find(motiveReasons, { id : event.target.value });
+    const newMotive = find(motiveReasons, { id: event.target.value });
     cleanState();
     setMotive(newMotive);
     getCalendar(initialDate, endDate, newMotive.id, isFirstAppointment, calendarId).then(
@@ -173,7 +166,7 @@ function Card(props: any) {
             })}
           </tbody>
         </table>
-        {isEmpty(availabilities) ? <><EmptyBanner /></> :
+        {isEmpty(availabilities) ? <EmptyBanner />:
           displayShowMore &&
           <DivCenter>
             <Button onClick={() => handleShowMore()}>
