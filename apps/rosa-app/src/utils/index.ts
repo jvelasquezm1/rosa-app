@@ -1,4 +1,5 @@
-import { max } from "lodash";
+import { max } from 'lodash';
+import { initialMotiveReasons } from '../services/constants';
 
 export const getDatesInRange = (startDate: string, endDate: string) => {
     const dates = [];
@@ -31,7 +32,7 @@ export const displayEvery30Min = (availabilities: any) => {
                         slots: [...hours[initialHour.getDate()].slots,
                         `${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`]
                     })
-                : { slots: [`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`] };
+                : { slots: [`${initialHour.getHours()}:${getMinutesWithTwoDigits(initialHour)}`], motives: initialMotiveReasons };
             initialHour.setMinutes(initialHour.getMinutes() + 30);
         }
     })

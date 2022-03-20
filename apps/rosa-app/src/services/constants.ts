@@ -4,7 +4,7 @@ export const mockedValues = {
     initialDate_: convertDateToISO(),
     endDate_: addDaysToDate(5, convertDateToISO()),
     motive_: '61eea367ddf6c500149ae2cc',
-    isNewPatient_: true,
+    isFirstAppointment_: true,
     nextPage_: false
 }
 

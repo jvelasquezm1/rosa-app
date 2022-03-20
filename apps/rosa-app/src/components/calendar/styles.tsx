@@ -2,6 +2,7 @@ import { Button } from '@material-ui/core'
 import styled from 'styled-components'
 
 export const CalendarContainer = styled.div`
+    margin: auto;
     width: 40rem;
     padding: 3rem;
     border: solid;
@@ -22,4 +23,12 @@ export const ButtonCalendar = styled(Button)<any>`
     text-align: center;
     padding: 1rem;
     margin: 1rem;
+    &:hover {
+        border: solid
+    }
 `;
+
+export const StyledP = styled.p`
+    margin: 2rem;
+`;
+

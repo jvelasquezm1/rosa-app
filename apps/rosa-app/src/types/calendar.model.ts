@@ -5,3 +5,8 @@ export interface ICalendar {
     isNewPatient: boolean,
     nextPage: boolean
 }
+export interface ICalendarRange {
+    month: string,
+    day: string,
+    number: number
+}

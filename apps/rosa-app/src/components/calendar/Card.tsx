@@ -6,24 +6,28 @@ import {
   RadioGroup,
   Radio,
   Select,
-  MenuItem
+  MenuItem,
+  Dialog
 } from '@material-ui/core';
-import { filter, includes, isEmpty } from 'lodash';
-import { ButtonCalendar, CalendarContainer, DivCenter } from './styles';
+import { filter, find, includes, isEmpty } from 'lodash';
+import { ButtonCalendar, CalendarContainer, DivCenter, StyledP } from './styles';
 
 import EmptyBanner from '../common/EmptyBanner';
 import { getCalendar } from '../../services/calendar.services'
 import { mockedValues, initialMotiveReasons, no, yes } from '../../services/constants';
 import { addDaysToDate, displayEvery30Min, getArrayOfTr, getDatesInRange, paginate } from '../../utils';
+import { ICalendarRange } from '../../types/calendar.model';
 
 export default function Card() {
-  const { motive_, isNewPatient_ } = mockedValues
+  const { motive_, isFirstAppointment_ } = mockedValues
   const [motive, setMotive] = useState(motive_ as string)
-  const [isNewPatient, setIsNewPatient] = useState(isNewPatient_)
-  const [calendarRange, setCalendarRange] = useState([] as any)
+  const [isFirstAppointment, setIsFirstAppointment] = useState(isFirstAppointment_)
+  const [calendarRange, setCalendarRange] = useState([] as ICalendarRange[])
   const [availabilities, setAvailabilities] = useState({} as any)
   const [nextPageClicked, setNextPageClicked] = useState(false)
   const [displayShowMore, setDisplayShowMore] = useState(true)
+  const [openModal, setOpenModal] = useState(false)
+  const [modalMessage, setModalMessage] = useState('')
   const [motiveReasons, setMotiveReasons] = useState(initialMotiveReasons)
   const [pagination, setPagination] = useState({
     page: 1,
@@ -35,7 +39,7 @@ export default function Card() {
   useEffect(() => {
     const { initialDate_, endDate_ } = mockedValues
     setCalendarRange(getDatesInRange(initialDate_, endDate_));
-    getCalendar(initialDate_, endDate_, motive, isNewPatient).then(
+    getCalendar(initialDate_, endDate_, motive, isFirstAppointment).then(
       options => setAvailabilities(displayEvery30Min(options))
     );
   }, []);
@@ -45,13 +49,13 @@ export default function Card() {
     if (nextPage) {
       setNextPageClicked(true)
       setCalendarRange(getDatesInRange(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_)));
-      getCalendar(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_), motive, isNewPatient).then(
+      getCalendar(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_), motive, isFirstAppointment).then(
         options => setAvailabilities(displayEvery30Min(options))
       );
     } else {
       setNextPageClicked(false);
       setCalendarRange(getDatesInRange(initialDate_, endDate_));
-      getCalendar(initialDate_, endDate_, motive, isNewPatient).then(
+      getCalendar(initialDate_, endDate_, motive, isFirstAppointment).then(
         options => setAvailabilities(displayEvery30Min(options))
       );
     }
@@ -70,9 +74,18 @@ export default function Card() {
   }
 
   const handleTimeSelection = (time: any, index: number, i: number) => {
-    setCellSelected({ id: `${index}:${i}` })
+    setCellSelected({ id: `${index}:${i}`, time: time })
     handleMotives(availabilities[time.number])
     setTimeSlot(availabilities[time.number].slots[index] || '')
+  }
+
+  const validateAppointment = () => {
+    const motiveReason = find(motiveReasons, { id: motive }) || { name: '' },
+      { time } = cellSelected;
+    setOpenModal(true)
+    isEmpty(timeSlot)
+      ? setModalMessage('Select time first to continue booking')
+      : setModalMessage(`${isFirstAppointment ? 'First a' : ' A'}ppointment booked for ${time.day}, ${time.month} ${time.number} at ${timeSlot} with motive: ${motiveReason.name}`)
   }
 
   return (
@@ -80,7 +93,7 @@ export default function Card() {
       <h1>Find availability</h1>
       <FormControl>
         <h3>Is this your first appointment with this practitioner?</h3>
-        <RadioGroup row defaultValue={yes} onChange={(e: any) => setIsNewPatient(e.target.value === { yes })}>
+        <RadioGroup row defaultValue={yes} onChange={(e: any) => setIsFirstAppointment(e.target.value === { yes })}>
           <FormControlLabel value={yes} control={<Radio color='default' />} label='Yes' />
           <FormControlLabel value={no} control={<Radio color='default' />} label='No' />
         </RadioGroup>
@@ -143,11 +156,18 @@ export default function Card() {
           </DivCenter>}
         {!isEmpty(availabilities) &&
           <DivCenter>
-            <Button onClick={() => console.log(motive, timeSlot, isNewPatient)}>
+            <Button onClick={() => validateAppointment()}>
               <p>Book appointment</p>
             </Button>
           </DivCenter>}
       </div>
+      <Dialog
+        open={openModal}
+        onClose={() => setOpenModal(false)}>
+        <StyledP>
+          {modalMessage}
+        </StyledP>
+      </Dialog>
     </CalendarContainer >
   )
 }
