@@ -1,7 +1,7 @@
 import { max } from 'lodash';
-import { initialMotiveReasons } from '../services/constants';
+import { initialMotiveReasons } from '../components/calendar/constants';
 
-export const getDatesInRange = (startDate: string, endDate: string) => {
+const getDatesInRange = (startDate: string, endDate: string) => {
     const dates = [];
     const dateISO = new Date(startDate);
     const endDateISO = new Date(endDate);
@@ -19,7 +19,7 @@ const getMinutesWithTwoDigits = (initialHour: Date) => initialHour.getMinutes() 
     ? `0${initialHour.getMinutes()}`
     : initialHour.getMinutes()
 
-export const displayEvery30Min = (availabilities: any) => {
+const displayEvery30Min = (availabilities: any) => {
     let hours = {} as any;
     availabilities.map((availability: any) => {
         const initialHour = new Date(availability.startAt);
@@ -39,17 +39,21 @@ export const displayEvery30Min = (availabilities: any) => {
     return hours;
 }
 
-export const getArrayOfTr = (availabilities: any) => Array.from({ length: max(Object.values(availabilities).map((a: any) => a.slots.length)) }, (v: any, i: any) => i);
+const getArrayOfTr = (availabilities: any) => Array.from({ length: max(Object.values(availabilities).map((a: any) => a.slots.length)) }, (v: any, i: any) => i);
 
-export const addDaysToDate = (numberOfDays: number, date: string) => {
+const addDaysToDate = (numberOfDays: number, date: string) => {
     const currentDate = new Date(date);
     const daysAfterToday = currentDate.setDate(currentDate.getDate() + numberOfDays);
     return new Date(daysAfterToday).toISOString();
 }
 
-export const convertDateToISO = (date?: string) => {
-    const currentDate = new Date();
-    return date ? new Date(date).toISOString() : currentDate.toISOString();
-}
+const paginate = (array: any, page_size: any, page_number: any) => array.slice((page_number - 1) * page_size, page_number * page_size)
 
-export const paginate = (array: any, page_size: any, page_number: any) => array.slice((page_number - 1) * page_size, page_number * page_size)
+export {
+    getDatesInRange,
+    getMinutesWithTwoDigits,
+    displayEvery30Min,
+    getArrayOfTr,
+    addDaysToDate,
+    paginate
+}

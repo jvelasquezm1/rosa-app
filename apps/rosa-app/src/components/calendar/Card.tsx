@@ -14,12 +14,12 @@ import { ButtonCalendar, CalendarContainer, DivCenter, StyledP } from './styles'
 
 import EmptyBanner from '../common/EmptyBanner';
 import { getCalendar } from '../../services/calendar.services'
-import { mockedValues, initialMotiveReasons, no, yes } from '../../services/constants';
+import { intialValues, initialMotiveReasons, no, yes } from './constants';
 import { addDaysToDate, displayEvery30Min, getArrayOfTr, getDatesInRange, paginate } from '../../utils';
 import { ICalendarRange } from '../../types/calendar.model';
 
 export default function Card() {
-  const { motive_, isFirstAppointment_ } = mockedValues
+  const { motive_, isFirstAppointment_ } = intialValues
   const [motive, setMotive] = useState(motive_ as string)
   const [isFirstAppointment, setIsFirstAppointment] = useState(isFirstAppointment_)
   const [calendarRange, setCalendarRange] = useState([] as ICalendarRange[])
@@ -37,7 +37,7 @@ export default function Card() {
   const [cellSelected, setCellSelected] = useState({} as any)
 
   useEffect(() => {
-    const { initialDate_, endDate_ } = mockedValues
+    const { initialDate_, endDate_ } = intialValues
     setCalendarRange(getDatesInRange(initialDate_, endDate_));
     getCalendar(initialDate_, endDate_, motive, isFirstAppointment).then(
       options => setAvailabilities(displayEvery30Min(options))
@@ -45,7 +45,7 @@ export default function Card() {
   }, []);
 
   const handleNextPage = (nextPage: boolean) => {
-    const { initialDate_, endDate_ } = mockedValues
+    const { initialDate_, endDate_ } = intialValues
     if (nextPage) {
       setNextPageClicked(true)
       setCalendarRange(getDatesInRange(addDaysToDate(5, initialDate_), addDaysToDate(5, endDate_)));
