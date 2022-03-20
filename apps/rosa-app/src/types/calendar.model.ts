@@ -1,11 +1,11 @@
-export interface ICalendar {
+interface ICalendar {
     initialDate: string,
     endDate: string,
     motive: string,
     isNewPatient: boolean,
     nextPage: boolean
 }
-export interface ICalendarRange {
+interface ICalendarRange {
     month: string,
     day: string,
     number: number

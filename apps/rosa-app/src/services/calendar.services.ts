@@ -1,5 +1,4 @@
 import { get } from './api';
-import { ICalendar } from '../types/calendar.model';
 
 export const getCalendar = async (initialDate: string,
   endDate: string,

@@ -23,8 +23,9 @@ export const ButtonCalendar = styled(Button)<any>`
     text-align: center;
     padding: 1rem;
     margin: 1rem;
+    border: solid 0.1rem transparent !important;
     &:hover {
-        border: solid
+        border-color: black !important;
     }
 `;
 
